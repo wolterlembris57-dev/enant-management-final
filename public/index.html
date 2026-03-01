@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tenant Management</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e3a8a">
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f3f4f6;
+  margin:0;
+  padding:20px;
+}
+
+h1{
+  text-align:center;
+  background:#1e3a8a;
+  color:white;
+  padding:15px;
+  border-radius:10px;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border-radius:10px;
+  box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+input,button{
+  padding:10px;
+  margin:5px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+button{
+  background:#1e3a8a;
+  color:white;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#162c6b;
+}
+
+table{
+  width:100%;
+  margin-top:20px;
+  border-collapse:collapse;
+}
+
+th,td{
+  border:1px solid #ddd;
+  padding:10px;
+  text-align:center;
+}
+
+th{
+  background:#1e3a8a;
+  color:white;
+}
+
+.total{
+  margin-top:15px;
+  font-size:18px;
+  font-weight:bold;
+  text-align:right;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏠 Tenant Management System (TZS)</h1>
+
+<div class="container">
+
+<h3>Add Tenant</h3>
+
+<input id="name" placeholder="Tenant Name">
+<input id="room" placeholder="Room Number">
+<input id="rent" type="number" placeholder="Rent Amount (TZS)">
+<button onclick="addTenant()">Add Tenant</button>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Room</th>
+<th>Rent (TZS)</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="tenantList"></tbody>
+</table>
+
+<div class="total" id="totalRent">
+Total Rent: 0 TZS
+</div>
+
+</div>
+
+<script>
+
+async function loadTenants(){
+  const res = await fetch('/tenants');
+  const tenants = await res.json();
+
+  const list = document.getElementById('tenantList');
+  list.innerHTML = "";
+
+  let total = 0;
+
+  tenants.forEach(t=>{
+    const rentValue = Number(t.rent) || 0;
+    total += rentValue;
+
+    list.innerHTML += `
+      <tr>
+        <td>${t.name}</td>
+        <td>${t.room}</td>
+        <td>${rentValue.toLocaleString()} TZS</td>
+        <td>
+          <button onclick="deleteTenant(${t.id})">Delete</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  document.getElementById("totalRent").innerText =
+    "Total Rent: " + total.toLocaleString() + " TZS";
+}
+
+async function addTenant(){
+
+  const name = document.getElementById('name').value.trim();
+  const room = document.getElementById('room').value.trim();
+  const rent = document.getElementById('rent').value.trim();
+
+  if(!name || !room || !rent){
+    alert("Please fill all fields");
+    return;
+  }
+
+  if(isNaN(rent)){
+    alert("Rent must be a number");
+    return;
+  }
+
+  await fetch('/tenants',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      name:name,
+      room:room,
+      rent:Number(rent)
+    })
+  });
+
+  document.getElementById('name').value="";
+  document.getElementById('room').value="";
+  document.getElementById('rent').value="";
+
+  loadTenants();
+}
+
+async function deleteTenant(id){
+  await fetch(`/tenants/${id}`,{method:'DELETE'});
+  loadTenants();
+}
+
+loadTenants();
+
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js');
+}
+</script>
+
+</body>
+</html>
