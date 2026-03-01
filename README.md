@@ -20,7 +20,7 @@ It allows landlords to manage tenants, rooms, and rent payments.
 - JavaScript
 - Node.js
 - ## VIDEO LINK
-- https://drive.google.com/file/d/1sMOvEPZF_ob3MhQt6as-1DhOW3AbYXuD/view?usp=sharing
+-https://drive.google.com/file/d/1c60KtKQO7nWZAqsy2Hlt28NhR0aNqsm7/view?usp=sharing
 - Express
 
 ## How to Run
